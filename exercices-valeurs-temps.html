@@ -1,1 +1,532 @@
 
+<title>Exercices interactifs — Valeur des temps : antérieur, postérieur, accompli, inaccompli</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg:#f5f6fb;
+  --surface:#ffffff;
+  --surface-2:#eef1f9;
+  --ink:#1b2338;
+  --muted:#5c6480;
+  --accent:#213d6b;
+  --accent-ink:#ffffff;
+  --accent-soft:#e6ecf9;
+  --gold:#b8842c;
+  --gold-soft:#f7ecd9;
+  --good:#1f7a45;
+  --good-bg:#e4f6e9;
+  --bad:#b23a2e;
+  --bad-bg:#fbe9e7;
+  --border:#dde2ef;
+  --shadow: 0 1px 2px rgba(27,35,56,.05), 0 8px 24px -12px rgba(27,35,56,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12141d;
+    --surface:#191c28;
+    --surface-2:#20243380;
+    --ink:#e8eaf4;
+    --muted:#9aa1bd;
+    --accent:#7fa0e0;
+    --accent-ink:#0d1420;
+    --accent-soft:#212a45;
+    --gold:#e2b45c;
+    --gold-soft:#332911;
+    --good:#6fd39a;
+    --good-bg:#123322;
+    --bad:#ff9086;
+    --bad-bg:#3a1a19;
+    --border:#2c3247;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12141d;
+  --surface:#191c28;
+  --surface-2:#20243380;
+  --ink:#e8eaf4;
+  --muted:#9aa1bd;
+  --accent:#7fa0e0;
+  --accent-ink:#0d1420;
+  --accent-soft:#212a45;
+  --gold:#e2b45c;
+  --gold-soft:#332911;
+  --good:#6fd39a;
+  --good-bg:#123322;
+  --bad:#ff9086;
+  --bad-bg:#3a1a19;
+  --border:#2c3247;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+}
+
+*{box-sizing:border-box;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Source Sans 3', system-ui, sans-serif;
+  padding-inline:20px;
+  padding-block:0 40px;
+}
+h1,h2,h3{
+  font-family:'Fraunces', Georgia, serif;
+  text-wrap:balance;
+  margin:0;
+}
+.wrap{ max-width:760px; margin:0 auto; }
+
+header.hero{ padding-block:34px 22px; text-align:center; }
+header.hero .kicker{
+  font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--gold); font-weight:600; margin-bottom:8px;
+}
+header.hero h1{ font-size:clamp(1.5rem,4.2vw,2.1rem); font-weight:700; color:var(--ink); }
+header.hero p{ color:var(--muted); margin-top:10px; font-size:.98rem; max-width:56ch; margin-inline:auto; }
+
+.legend{
+  display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:16px 0 4px;
+}
+.legend .chip{
+  font-size:.78rem; padding:5px 12px; border-radius:999px; background:var(--surface);
+  border:1px solid var(--border); color:var(--muted);
+}
+.legend .chip b{ color:var(--ink); }
+
+nav.levels{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom:1px solid var(--border);
+  padding-block:10px; margin-inline:-20px; padding-inline:20px;
+}
+nav.levels .row{
+  max-width:760px; margin:0 auto; display:flex; gap:8px;
+  overflow-x:auto; scrollbar-width:none; padding-bottom:2px;
+}
+nav.levels .row::-webkit-scrollbar{display:none;}
+.lvl-btn{
+  flex:0 0 auto; border:1px solid var(--border); background:var(--surface);
+  color:var(--muted); font-family:inherit; font-size:.82rem; font-weight:600;
+  padding:7px 13px; border-radius:999px; cursor:pointer;
+  display:flex; align-items:center; gap:6px;
+  transition:border-color .15s, color .15s, background .15s;
+}
+.lvl-btn:hover{ border-color:var(--accent); color:var(--ink); }
+.lvl-btn.active{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.lvl-btn .dot{
+  width:16px;height:16px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:.64rem; font-weight:700; background:var(--surface-2); color:var(--muted);
+}
+.lvl-btn.done .dot{ background:var(--good); color:#fff; }
+
+.progress-outer{
+  max-width:760px; margin:8px auto 0; height:5px; border-radius:3px;
+  background:var(--surface-2); overflow:hidden;
+}
+.progress-inner{
+  height:100%; width:0%; background:linear-gradient(90deg, var(--gold), var(--accent));
+  transition:width .3s ease;
+}
+
+section.level{
+  padding-block:36px 8px; border-top:1px solid var(--border); scroll-margin-top:96px;
+}
+section.level:first-of-type{ border-top:none; }
+.level-head{
+  display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  margin-bottom:4px;
+}
+.level-head h2{ font-size:1.32rem; color:var(--ink); }
+.stars{ color:var(--gold); font-size:.85rem; letter-spacing:2px; white-space:nowrap; }
+.level-instr{ color:var(--muted); font-size:.92rem; margin-top:6px; margin-bottom:22px; max-width:64ch; }
+.level-score{
+  font-size:.8rem; color:var(--muted); font-weight:600;
+  background:var(--surface-2); border-radius:999px; padding:4px 11px;
+}
+
+.q-card{
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:18px 20px; margin-bottom:14px; box-shadow:var(--shadow);
+}
+.q-num{
+  font-size:.72rem; font-weight:700; color:var(--muted);
+  letter-spacing:.06em; text-transform:uppercase; margin-bottom:8px;
+}
+.q-sentence{ font-size:1.06rem; line-height:1.55; margin-bottom:14px; }
+.q-sentence u{
+  text-decoration:none; border-bottom:2.5px solid var(--gold); font-weight:600; padding-bottom:1px;
+}
+.q-options{ display:flex; flex-wrap:wrap; gap:8px; }
+.opt-btn{
+  font-family:inherit; font-size:.88rem; font-weight:600;
+  padding:8px 14px; border-radius:9px; border:1.5px solid var(--border);
+  background:var(--surface-2); color:var(--ink); cursor:pointer;
+  transition:transform .1s, border-color .15s, background .15s;
+}
+.opt-btn:hover:not(:disabled){ border-color:var(--accent); }
+.opt-btn:active:not(:disabled){ transform:scale(.97); }
+.opt-btn:disabled{ cursor:default; }
+.opt-btn.correct{ background:var(--good-bg); border-color:var(--good); color:var(--good); }
+.opt-btn.wrong{ background:var(--bad-bg); border-color:var(--bad); color:var(--bad); }
+.opt-btn.dim{ opacity:.45; }
+.q-explain{
+  margin-top:12px; padding-top:12px; border-top:1px dashed var(--border);
+  font-size:.87rem; color:var(--muted); display:none;
+}
+.q-explain b{ color:var(--ink); }
+.q-explain.show{ display:block; }
+
+.bilan{
+  margin-top:40px; background:var(--accent-soft); border:1px solid var(--border);
+  border-radius:16px; padding:26px 24px; text-align:center;
+}
+.bilan h2{ font-size:1.5rem; margin-bottom:6px; }
+.bilan .score-big{
+  font-family:'Fraunces', serif; font-size:2.6rem; font-weight:700;
+  color:var(--accent); font-variant-numeric: tabular-nums; margin:6px 0;
+}
+.bilan .detail{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:16px; }
+.bilan .chip{
+  background:var(--surface); border:1px solid var(--border); border-radius:999px;
+  padding:6px 12px; font-size:.8rem; font-weight:600; color:var(--muted);
+}
+.bilan .chip b{ color:var(--ink); }
+.reset-btn{
+  margin-top:18px; font-family:inherit; font-weight:700; font-size:.86rem;
+  background:var(--accent); color:var(--accent-ink);
+  border:none; border-radius:999px; padding:10px 22px; cursor:pointer;
+}
+.reset-btn:hover{ opacity:.92; }
+
+footer.pagefoot{ text-align:center; color:var(--muted); font-size:.78rem; padding-top:30px; }
+</style>
+
+<header class="hero">
+  <div class="kicker">Entraînement — 3ème / lycée</div>
+  <h1>Valeur des temps : antérieur, postérieur, accompli, inaccompli</h1>
+  <p>48 phrases, verbe souligné : l'action est-elle antérieure ou postérieure à un autre repère du récit, ou bien accomplie (achevée) ou inaccomplie (en cours) ? Six niveaux, difficulté croissante.</p>
+</header>
+
+<div class="legend">
+  <span class="chip"><b>Inaccomplie</b> : action en cours, non achevée</span>
+  <span class="chip"><b>Accomplie</b> : action ponctuelle, achevée, sans autre repère à comparer</span>
+  <span class="chip"><b>Accomplie et antérieure</b> : achevée, et précède un autre repère du récit</span>
+  <span class="chip"><b>Postérieure</b> : pas encore réalisée, vient après un autre repère</span>
+</div>
+<p style="max-width:64ch;margin:6px auto 0;text-align:center;color:var(--muted);font-size:.86rem;">« Antérieure » et « accomplie » ne s'opposent pas : un plus-que-parfait, par exemple, est toujours accompli <em>et</em> antérieur en même temps.</p>
+
+<nav class="levels">
+  <div class="row" id="levelNav"></div>
+  <div class="progress-outer"><div class="progress-inner" id="progressBar"></div></div>
+</nav>
+
+<main class="wrap">
+  <div id="levelsContainer"></div>
+
+  <div class="bilan">
+    <h2>Bilan général</h2>
+    <div class="score-big" id="bilanScore">0 / 48</div>
+    <div id="bilanMsg" style="color:var(--muted);font-size:.9rem;">Répondez aux questions ci-dessus pour voir votre score évoluer.</div>
+    <div class="detail" id="bilanDetail"></div>
+    <button class="reset-btn" id="resetBtn">Recommencer tout l'entraînement</button>
+  </div>
+
+  <footer class="pagefoot">Valeur temporelle (antériorité / postériorité) et valeur aspectuelle (accompli / inaccompli) des temps du récit.</footer>
+</main>
+
+<script>
+const OPTS = ["Inaccomplie","Accomplie","Accomplie et antérieure","Postérieure"];
+function mk(s, correctWord, explain){
+  return {s, options:[...OPTS], correct:OPTS.indexOf(correctWord), explain};
+}
+
+const LEVELS = [
+{
+  title:"Niveau 1 — Accompli ou inaccompli ?",
+  stars:1,
+  instr:"Imparfait ou passé simple : l'action est-elle achevée (accomplie) ou en train de se dérouler (inaccomplie) ?",
+  questions:[
+    mk("Le ciel <u>était</u> gris lorsque l'orage éclata.", "Inaccomplie", "Imparfait : l'état du ciel est décrit dans sa durée, non achevé — inaccomplie."),
+    mk("Le chien <u>aboya</u> soudain dans la nuit.", "Accomplie", "Passé simple : une action brève, surgie et achevée — accomplie."),
+    mk("Le vase <u>tomba</u> et se brisa en mille morceaux.", "Accomplie", "Passé simple : une action ponctuelle, achevée — accomplie."),
+    mk("Elle <u>lisait</u> tranquillement quand le téléphone sonna.", "Inaccomplie", "Imparfait : l'action est en cours au moment où le téléphone sonne — inaccomplie."),
+    mk("Il <u>ferma</u> la porte à clé avant de partir.", "Accomplie", "Passé simple : action brève et achevée — accomplie."),
+    mk("Les enfants <u>jouaient</u> dans le jardin quand la pluie commença.", "Inaccomplie", "Imparfait : l'action se déroule, n'est pas close — inaccomplie."),
+    mk("Elle <u>chantait</u> doucement pour endormir le bébé.", "Inaccomplie", "Imparfait : action en cours, envisagée dans son déroulement — inaccomplie."),
+    mk("Le coureur <u>franchit</u> la ligne d'arrivée sous les applaudissements.", "Accomplie", "Passé simple : action ponctuelle et achevée — accomplie.")
+  ]
+},
+{
+  title:"Niveau 2 — Simplement accompli, ou accompli et antérieur ?",
+  stars:2,
+  instr:"Passé simple, ou plus-que-parfait : dans les deux cas l'action est accomplie. Mais le plus-que-parfait, lui, précède en plus un autre repère du récit — les deux valeurs coexistent, on ne les oppose pas.",
+  questions:[
+    mk("Il <u>rangea</u> ses affaires avant de sortir.", "Accomplie", "Passé simple : un fait ponctuel, achevé, sans qu'on le compare à un autre repère précis — accomplie."),
+    mk("Quand nous sommes arrivés, elle <u>avait déjà préparé</u> le repas.", "Accomplie et antérieure", "Plus-que-parfait : le repas était prêt, donc accompli — et cela précède notre arrivée, donc antérieur. Les deux à la fois."),
+    mk("Elle comprit que son frère <u>avait menti</u>.", "Accomplie et antérieure", "Plus-que-parfait : le mensonge est un fait accompli, et il précède le moment où elle comprend — accompli et antérieur."),
+    mk("Elle <u>ouvrit</u> la lettre qu'elle venait de recevoir.", "Accomplie", "Passé simple : action brève et achevée, prise pour elle-même — accomplie."),
+    mk("Le magasin <u>avait fermé</u> quand nous sommes arrivés.", "Accomplie et antérieure", "Plus-que-parfait : la fermeture est achevée, et elle précède notre arrivée — accomplie et antérieure."),
+    mk("Il <u>partit</u> sans dire un mot.", "Accomplie", "Passé simple : action ponctuelle et achevée — accomplie."),
+    mk("Nous avons appris qu'ils <u>avaient déménagé</u> l'année précédente.", "Accomplie et antérieure", "Plus-que-parfait : le déménagement est achevé, et il précède le moment où nous l'apprenons — accomplie et antérieure."),
+    mk("Le train <u>quitta</u> la gare à l'heure prévue.", "Accomplie", "Passé simple : action ponctuelle et achevée — accomplie.")
+  ]
+},
+{
+  title:"Niveau 3 — Postérieure ou inaccomplie ?",
+  stars:3,
+  instr:"Imparfait, ou « allait + infinitif » / conditionnel à valeur de futur dans le passé : l'action est-elle en cours (inaccomplie), ou annoncée comme devant se produire après un autre repère (postérieure) ?",
+  questions:[
+    mk("Il <u>pleuvait</u> depuis le matin.", "Inaccomplie", "Imparfait : l'action dure, n'est pas achevée — inaccomplie."),
+    mk("Elle savait qu'elle <u>allait rater</u> son train.", "Postérieure", "« allait rater » : futur proche du passé, l'action se produira après le moment où elle le sait — postérieure."),
+    mk("Il ignorait qu'il <u>deviendrait</u> un jour célèbre.", "Postérieure", "Conditionnel à valeur de futur dans le passé : la célébrité viendra après le moment où il l'ignore — postérieure."),
+    mk("Le ciel <u>s'assombrissait</u> peu à peu.", "Inaccomplie", "Imparfait : action progressive, en cours — inaccomplie."),
+    mk("Elle sentait qu'elle <u>allait s'évanouir</u>.", "Postérieure", "« allait s'évanouir » : futur proche du passé, postérieur au moment où elle le sent — postérieure."),
+    mk("Les invités <u>discutaient</u> tranquillement au salon.", "Inaccomplie", "Imparfait : action en cours, non achevée — inaccomplie."),
+    mk("Le feu <u>crépitait</u> dans la cheminée.", "Inaccomplie", "Imparfait : action en cours, description — inaccomplie."),
+    mk("Personne ne se doutait qu'il <u>quitterait</u> la ville sans prévenir.", "Postérieure", "Conditionnel à valeur de futur dans le passé : le départ vient après le moment où personne ne s'en doute — postérieure.")
+  ]
+},
+{
+  title:"Niveau 4 — Les quatre valeurs mélangées",
+  stars:4,
+  instr:"Inaccomplie, accomplie, accomplie et antérieure, ou postérieure : à vous de choisir, phrase par phrase. Rappel : accomplie et antérieure vont souvent ensemble, ce n'est pas un choix entre les deux.",
+  questions:[
+    mk("Elle <u>flânait</u> dans les rues sans but précis.", "Inaccomplie", "Imparfait : action en cours, sans limite marquée — inaccomplie."),
+    mk("Dès qu'il <u>eut terminé</u> son repas, il partit travailler.", "Accomplie et antérieure", "Passé antérieur : le repas est fini (accompli), et cela précède immédiatement « partit » (antérieur) — les deux ensemble."),
+    mk("Le public <u>applaudit</u> longuement à la fin du spectacle.", "Accomplie", "Passé simple : action ponctuelle et achevée — accomplie."),
+    mk("Il savait déjà qu'il <u>déménagerait</u> avant l'été.", "Postérieure", "Conditionnel à valeur de futur dans le passé : le déménagement vient après le moment où il le sait — postérieure."),
+    mk("La foule <u>attendait</u> patiemment l'ouverture des portes.", "Inaccomplie", "Imparfait : action en cours, non achevée — inaccomplie."),
+    mk("Le vent <u>se leva</u> brutalement en fin d'après-midi.", "Accomplie", "Passé simple : action ponctuelle et achevée — accomplie."),
+    mk("Nous pressentions qu'elle <u>reviendrait</u> un jour.", "Postérieure", "Conditionnel à valeur de futur dans le passé : le retour vient après le moment où nous le pressentons — postérieure."),
+    mk("Ils <u>avaient visité</u> ce musée bien avant notre rencontre.", "Accomplie et antérieure", "Plus-que-parfait : la visite est achevée, et elle précède un autre moment du récit — accomplie et antérieure.")
+  ]
+},
+{
+  title:"Niveau 5 — Phrases à plusieurs propositions",
+  stars:5,
+  instr:"Le repère auquel comparer l'action soulignée est un autre verbe de la même phrase : repérez-le avant de choisir.",
+  questions:[
+    mk("Il <u>marchait</u> le long de la plage quand il aperçut une bouteille échouée sur le sable.", "Inaccomplie", "Imparfait : action en cours, interrompue par « aperçut » — inaccomplie."),
+    mk("Elle <u>ferma</u> les yeux et respira profondément avant de monter sur scène.", "Accomplie", "Passé simple : action ponctuelle et achevée — accomplie."),
+    mk("Après qu'elle <u>eut fini</u> ses devoirs, elle regarda la télévision pendant que sa mère préparait le dîner.", "Accomplie et antérieure", "Passé antérieur : les devoirs sont finis (accompli), et cela précède immédiatement « regarda » (antérieur)."),
+    mk("Il pressentait qu'il <u>allait perdre</u> la partie, mais il continua à jouer avec ténacité.", "Postérieure", "« allait perdre » : futur proche du passé, postérieur au moment où il le pressent — postérieure."),
+    mk("Comme il <u>avait plu</u> toute la nuit, les rues étaient inondées quand nous sommes sortis.", "Accomplie et antérieure", "Plus-que-parfait : la pluie est achevée, et elle précède l'état des rues décrit ensuite — accomplie et antérieure."),
+    mk("Le vieux marin <u>racontait</u> son histoire pendant que les enfants l'écoutaient, fascinés.", "Inaccomplie", "Imparfait : action en cours, simultanée à celle des enfants — inaccomplie."),
+    mk("Elle ne savait pas encore qu'elle <u>rencontrerait</u> bientôt l'homme de sa vie.", "Postérieure", "Conditionnel à valeur de futur dans le passé : la rencontre vient après le moment où elle l'ignore — postérieure."),
+    mk("Dès que la sonnerie <u>retentit</u>, les élèves se précipitèrent dans la cour.", "Accomplie", "Passé simple : action brève et achevée — accomplie.")
+  ]
+},
+{
+  title:"Niveau 6 — Phrases longues, plusieurs verbes",
+  stars:6,
+  instr:"Des phrases riches en verbes, comme dans un vrai récit : isolez le verbe souligné et son repère avant de répondre.",
+  questions:[
+    mk("Le vieil homme <u>somnolait</u> sur son banc quand un jeune garçon vint s'asseoir à côté de lui et engagea la conversation.", "Inaccomplie", "Imparfait : action en cours, interrompue par l'arrivée du garçon — inaccomplie."),
+    mk("Elle <u>traversa</u> la rue en courant, grimpa les escaliers quatre à quatre et arriva juste à temps pour attraper son train.", "Accomplie", "Passé simple : une action ponctuelle et achevée, dans une succession d'actions brèves — accomplie."),
+    mk("Il <u>avait économisé</u> pendant des mois lorsqu'il se décida enfin à acheter la voiture dont il rêvait depuis toujours.", "Accomplie et antérieure", "Plus-que-parfait : l'économie est achevée, et elle précède le moment où il se décide — accomplie et antérieure."),
+    mk("Il ne se doutait pas, en signant ce contrat, qu'il <u>regretterait</u> amèrement sa décision quelques années plus tard.", "Postérieure", "Conditionnel à valeur de futur dans le passé : le regret vient après le moment de la signature — postérieure."),
+    mk("Le navire <u>quitta</u> le port au lever du jour, salué par les cris des mouettes et les mouchoirs agités sur le quai.", "Accomplie", "Passé simple : action ponctuelle et achevée — accomplie."),
+    mk("Pendant que les invités <u>bavardaient</u> au salon, la maîtresse de maison surveillait la cuisson du gigot d'un œil inquiet.", "Inaccomplie", "Imparfait : action en cours, simultanée à celle de la maîtresse de maison — inaccomplie."),
+    mk("Elle sentait confusément, ce soir-là, qu'elle <u>ne reverrait</u> plus jamais cette maison de son enfance.", "Postérieure", "Conditionnel à valeur de futur dans le passé : le fait de ne plus revoir la maison vient après le moment décrit — postérieure."),
+    mk("À peine <u>eut-elle raccroché</u> le téléphone que son mari franchit la porte, essoufflé d'avoir couru.", "Accomplie et antérieure", "Passé antérieur : elle a fini de raccrocher (accompli), et cela précède immédiatement « franchit » (antérieur).")
+  ]
+}
+];
+
+LEVELS.forEach((lvl,li) => lvl.questions.forEach((q,qi) => { q.qid = li+'-'+qi; }));
+
+function shuffleQuestionOptions(q){
+  const correctText = q.options[q.correct];
+  const idx = q.options.map((_,i)=>i);
+  for(let i=idx.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [idx[i],idx[j]] = [idx[j],idx[i]];
+  }
+  q.options = idx.map(i=>q.options[i]);
+  q.correct = q.options.indexOf(correctText);
+}
+function shuffleAllOptions(){
+  LEVELS.forEach(lvl => lvl.questions.forEach(shuffleQuestionOptions));
+}
+function shuffleArray(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+}
+function shuffleAllQuestionOrder(){
+  LEVELS.forEach(lvl => shuffleArray(lvl.questions));
+}
+
+const state = { answers:{} };
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem('valeurs-temps-v1');
+    if(raw) state.answers = JSON.parse(raw);
+  }catch(e){}
+}
+function saveState(){
+  try{ localStorage.setItem('valeurs-temps-v1', JSON.stringify(state.answers)); }catch(e){}
+}
+
+function totalQuestions(){ return LEVELS.reduce((n,l)=>n+l.questions.length,0); }
+function scoreCount(){ return Object.values(state.answers).filter(v=>v===true).length; }
+function answeredCount(){ return Object.keys(state.answers).length; }
+function levelScore(li){
+  const lvl = LEVELS[li];
+  let correct=0, answered=0;
+  lvl.questions.forEach((q)=>{
+    const key = q.qid;
+    if(key in state.answers){ answered++; if(state.answers[key]) correct++; }
+  });
+  return {correct, answered, total: lvl.questions.length};
+}
+function starString(n){
+  let s=''; for(let i=0;i<6;i++) s += i<n ? '★' : '☆'; return s;
+}
+
+function renderNav(){
+  const nav = document.getElementById('levelNav');
+  nav.innerHTML = '';
+  LEVELS.forEach((lvl,li)=>{
+    const sc = levelScore(li);
+    const btn = document.createElement('button');
+    btn.className = 'lvl-btn' + (sc.answered===sc.total && sc.total>0 ? ' done':'');
+    btn.innerHTML = '<span class="dot">'+(li+1)+'</span><span>'+lvl.title.split('—')[1].trim().split(',')[0]+'</span>';
+    btn.title = lvl.title;
+    btn.addEventListener('click', ()=>{
+      document.getElementById('lvl-sec-'+li).scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    nav.appendChild(btn);
+  });
+}
+
+function renderProgress(){
+  const total = totalQuestions();
+  const done = scoreCount();
+  document.getElementById('progressBar').style.width = (answeredCount()/total*100)+'%';
+  document.getElementById('bilanScore').textContent = done + ' / ' + total;
+  const chips = document.getElementById('bilanDetail');
+  chips.innerHTML = '';
+  LEVELS.forEach((lvl,li)=>{
+    const sc = levelScore(li);
+    const chip = document.createElement('div');
+    chip.className='chip';
+    chip.innerHTML = 'Niveau '+(li+1)+' : <b>'+sc.correct+'/'+sc.total+'</b>';
+    chips.appendChild(chip);
+  });
+  const msg = document.getElementById('bilanMsg');
+  if(answeredCount()===0){
+    msg.textContent = "Répondez aux questions ci-dessus pour voir votre score évoluer.";
+  } else if(answeredCount() < total){
+    msg.textContent = "Continuez : il reste " + (total-answeredCount()) + " question(s).";
+  } else {
+    const pct = Math.round(done/total*100);
+    msg.textContent = pct>=85 ? "Excellent travail, ces valeurs sont bien maîtrisées !" : pct>=60 ? "Bon niveau, quelques révisions ciblées et ce sera parfait." : "Encore un peu d'entraînement, surtout sur les niveaux les plus faibles.";
+  }
+}
+
+function answerQuestion(li, qi, oi){
+  const q = LEVELS[li].questions[qi];
+  const key = q.qid;
+  if(key in state.answers) return;
+  state.answers[key] = (oi === q.correct);
+  saveState();
+  renderAll();
+}
+
+function renderLevels(){
+  const container = document.getElementById('levelsContainer');
+  container.innerHTML = '';
+  LEVELS.forEach((lvl,li)=>{
+    const sc = levelScore(li);
+    const sec = document.createElement('section');
+    sec.className='level';
+    sec.id = 'lvl-sec-'+li;
+
+    const head = document.createElement('div');
+    head.className='level-head';
+    head.innerHTML = '<h2>'+lvl.title+'</h2><span class="stars">'+starString(lvl.stars)+'</span>';
+    sec.appendChild(head);
+
+    const instr = document.createElement('div');
+    instr.className='level-instr';
+    instr.innerHTML = lvl.instr + ' <span class="level-score">'+sc.correct+' / '+sc.total+' correctes</span>';
+    sec.appendChild(instr);
+
+    lvl.questions.forEach((q,qi)=>{
+      const key = q.qid;
+      const answered = key in state.answers;
+      const card = document.createElement('div');
+      card.className='q-card';
+
+      const num = document.createElement('div');
+      num.className='q-num';
+      num.textContent = 'Question ' + (qi+1) + ' / ' + lvl.questions.length;
+      card.appendChild(num);
+
+      const sent = document.createElement('div');
+      sent.className='q-sentence';
+      sent.innerHTML = q.s;
+      card.appendChild(sent);
+
+      const opts = document.createElement('div');
+      opts.className='q-options';
+      q.options.forEach((optText, oi)=>{
+        const b = document.createElement('button');
+        b.className='opt-btn';
+        b.textContent = optText;
+        b.disabled = answered;
+        if(answered){
+          if(oi===q.correct) b.classList.add('correct');
+          else if(state.answers[key]===false && oi===parseInt(sec.dataset['chosen-'+qi])) b.classList.add('wrong');
+          else b.classList.add('dim');
+        }
+        b.addEventListener('click', ()=>{
+          sec.dataset['chosen-'+qi] = oi;
+          answerQuestion(li, qi, oi);
+        });
+        opts.appendChild(b);
+      });
+      card.appendChild(opts);
+
+      const expl = document.createElement('div');
+      expl.className='q-explain' + (answered ? ' show':'');
+      expl.innerHTML = '<b>Explication —</b> ' + q.explain;
+      card.appendChild(expl);
+
+      sec.appendChild(card);
+    });
+
+    container.appendChild(sec);
+  });
+}
+
+function renderAll(){
+  renderNav();
+  renderProgress();
+  renderLevels();
+}
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  state.answers = {};
+  saveState();
+  renderAll();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+function start(data){
+  shuffleAllQuestionOrder();
+  shuffleAllOptions();
+  loadState();
+  renderAll();
+}
+
+if(window.claude && window.claude.hot){
+  window.claude.hot.ready ? window.claude.hot.ready(start) : start(window.claude.hot.data || {});
+} else {
+  start({});
+}
+</script>
