@@ -1,1 +1,373 @@
 
+<title>Test — Modes, temps et valeurs des temps (100 questions)</title>
+<meta charset="UTF-8">
+<style>
+  :root{
+    --navy:#1a3c6e; --navy-l:#eaf0fa; --gold:#e0b400; --gold-l:#fff3cc;
+    --green:#2c6b2f; --green-l:#eef7ee; --red:#a52626; --red-l:#fbeaea;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    max-width: 900px; margin: 0 auto; padding: 20px 16px 60px;
+    color: #222; background: #fafbfd;
+  }
+  h1 { color: var(--navy); font-size: 22px; border-bottom: 3px solid var(--navy); padding-bottom: 8px; }
+  .intro { background: var(--gold-l); border: 1.5px solid var(--gold); border-radius: 8px; padding: 12px 16px; font-size: 14px; margin-bottom: 16px; }
+  .part-label {
+    display: inline-block; font-weight: bold; color: #fff; background: var(--navy);
+    border-radius: 4px; padding: 3px 10px; font-size: 12.5px; margin: 18px 0 8px;
+  }
+  .part-label.part2 { background: var(--green); }
+
+  #nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .nav-btn {
+    border: 1.5px solid #b9c6e6; background: #fff; border-radius: 6px; padding: 8px 12px;
+    font-size: 12.5px; cursor: pointer; color: #333; text-align: left; min-width: 150px;
+  }
+  .nav-btn.active { border-color: var(--navy); background: var(--navy-l); font-weight: bold; }
+  .nav-btn .stars { color: var(--gold); display: block; font-size: 11px; margin-top: 2px; }
+  .nav-btn .done { color: var(--green); }
+
+  #progress-wrap { background: #e4e9f2; border-radius: 8px; height: 10px; margin-bottom: 18px; overflow: hidden; }
+  #progress-bar { background: var(--navy); height: 100%; width: 0%; transition: width .3s; }
+  #progress-text { font-size: 12.5px; color: #555; margin-bottom: 4px; }
+
+  .level-title { color: var(--navy); font-size: 17px; margin: 4px 0 2px; }
+  .level-instr { font-style: italic; color: #555; font-size: 13px; margin-bottom: 14px; }
+
+  .q { background: #fff; border: 1.3px solid #dde3ef; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; }
+  .q .num { color: #888; font-size: 11.5px; }
+  .q .sent { font-size: 14.5px; margin: 4px 0 10px; }
+  .q .sent b { color: var(--navy); }
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  @media (max-width: 560px) { .opts { grid-template-columns: 1fr; } }
+  .opt {
+    border: 1.3px solid #ccd5e6; border-radius: 6px; padding: 7px 10px; font-size: 13px;
+    cursor: pointer; background: #fff; text-align: left;
+  }
+  .opt:hover { border-color: var(--navy); }
+  .opt.correct { background: var(--green-l); border-color: var(--green); color: var(--green); font-weight: bold; }
+  .opt.wrong { background: var(--red-l); border-color: var(--red); color: var(--red); }
+  .opt.disabled-right { background: var(--green-l); border-color: var(--green); color: var(--green); }
+  .explain { font-size: 12.5px; color: #555; margin-top: 8px; background: #f5f8fd; border-left: 3px solid var(--navy); padding: 6px 10px; display: none; }
+  .explain.show { display: block; }
+
+  #summary { margin-top: 20px; padding: 14px 18px; border-radius: 8px; background: var(--navy-l); border: 1.5px solid var(--navy); font-size: 14px; }
+  .reset-btn { margin-top: 14px; background: #fff; border: 1.3px solid #ccc; border-radius: 6px; padding: 6px 12px; font-size: 12.5px; cursor: pointer; color: #666; }
+</style>
+
+<h1>Test — Modes, temps et valeurs des temps</h1>
+<div class="intro">
+  100 questions. <b>Partie 1</b> (questions 1 à 50) : identifiez le <b>mode</b> et le <b>temps</b> du verbe en gras.
+  <b>Partie 2</b> (questions 51 à 100) : identifiez la <b>valeur</b> du temps employé — inaccomplie, accomplie, accomplie et antérieure, ou postérieure.
+  Rappel : un temps composé (plus-que-parfait, passé antérieur...) est toujours <b>à la fois</b> accompli <em>et</em> antérieur, ce n'est jamais l'un ou l'autre.
+  Vos réponses sont enregistrées automatiquement sur cet appareil.
+</div>
+
+<div id="progress-text"></div>
+<div id="progress-wrap"><div id="progress-bar"></div></div>
+<div id="nav"></div>
+<div id="quiz"></div>
+<div id="summary" style="display:none;"></div>
+<button class="reset-btn" onclick="resetAll()">Réinitialiser mes réponses</button>
+
+<script>
+/* ---------- PARTIE 1 : mode et temps ---------- */
+function q1(s, options, correctIdx, explain){ return {s, options, correct: correctIdx, explain}; }
+
+const L1 = [
+  q1("Elle <b>chante</b> juste.", ["Indicatif présent","Subjonctif présent","Indicatif imparfait","Indicatif futur simple"], 0, "Forme simple en « -e », affirmation présente : indicatif présent."),
+  q1("Nous <b>finissions</b> nos devoirs.", ["Indicatif imparfait","Indicatif présent","Subjonctif présent","Conditionnel présent"], 0, "Terminaison -ions avec description en cours : indicatif imparfait."),
+  q1("Il <b>partit</b> sans un mot.", ["Indicatif passé simple","Indicatif imparfait","Indicatif passé composé","Indicatif futur simple"], 0, "Action brève au passé, style narratif : passé simple."),
+  q1("Vous <b>partirez</b> demain matin.", ["Indicatif futur simple","Conditionnel présent","Indicatif présent","Indicatif imparfait"], 0, "Terminaison -ez / -rez, action à venir certaine : futur simple."),
+  q1("Je <b>mange</b> une pomme.", ["Indicatif présent","Indicatif imparfait","Subjonctif présent","Indicatif futur simple"], 0, "Action en train de se dérouler : indicatif présent."),
+  q1("Ils <b>jouaient</b> dans le jardin.", ["Indicatif imparfait","Indicatif passé simple","Indicatif présent","Conditionnel présent"], 0, "Terminaison -aient, arrière-plan descriptif : imparfait."),
+  q1("Elle <b>vint</b> nous voir un soir d'hiver.", ["Indicatif passé simple","Indicatif imparfait","Indicatif passé composé","Subjonctif imparfait"], 0, "« vint » (et non « vînt » avec accent circonflexe) : passé simple, pas subjonctif imparfait."),
+  q1("Tu <b>sauras</b> la vérité bientôt.", ["Indicatif futur simple","Conditionnel présent","Indicatif présent","Indicatif passé simple"], 0, "« sauras » (radical savoir + -ras) : futur simple."),
+  q1("Le vent <b>souffle</b> fort ce soir.", ["Indicatif présent","Indicatif imparfait","Subjonctif présent","Indicatif futur simple"], 0, "Constat au moment présent : indicatif présent."),
+  q1("Nous <b>habitions</b> à la campagne autrefois.", ["Indicatif imparfait","Indicatif présent","Indicatif passé simple","Conditionnel présent"], 0, "« autrefois » + habitude passée : imparfait."),
+  q1("Le roi <b>mourut</b> en 1715.", ["Indicatif passé simple","Indicatif imparfait","Indicatif passé composé","Indicatif futur simple"], 0, "Fait historique daté et ponctuel : passé simple."),
+  q1("Elles <b>viendront</b> avec nous.", ["Indicatif futur simple","Conditionnel présent","Indicatif présent","Indicatif passé simple"], 0, "« viendront » : futur simple de venir."),
+  q1("Vous <b>savez</b> conduire ?", ["Indicatif présent","Indicatif imparfait","Subjonctif présent","Indicatif futur simple"], 0, "Question sur une capacité actuelle : indicatif présent."),
+  q1("Je <b>finissais</b> toujours mes repas.", ["Indicatif imparfait","Indicatif présent","Indicatif passé simple","Conditionnel présent"], 0, "« toujours » + habitude passée : imparfait."),
+  q1("Elle <b>fut</b> heureuse ce jour-là.", ["Indicatif passé simple","Indicatif imparfait","Indicatif présent","Subjonctif présent"], 0, "« fut » : passé simple du verbe être."),
+  q1("Nous <b>partirons</b> à l'aube.", ["Indicatif futur simple","Conditionnel présent","Indicatif imparfait","Indicatif présent"], 0, "« partirons » : futur simple.")
+];
+
+const L2 = [
+  q1("Elle <b>a fini</b> son travail.", ["Indicatif passé composé","Indicatif plus-que-parfait","Indicatif futur antérieur","Indicatif passé antérieur"], 0, "avoir au présent + participe passé : passé composé."),
+  q1("Nous <b>avons mangé</b> au restaurant hier.", ["Indicatif passé composé","Indicatif plus-que-parfait","Indicatif imparfait","Indicatif passé antérieur"], 0, "avoir au présent + participe passé : passé composé."),
+  q1("Il <b>est parti</b> sans prévenir.", ["Indicatif passé composé","Indicatif plus-que-parfait","Indicatif passé simple","Indicatif passé antérieur"], 0, "être au présent + participe passé : passé composé."),
+  q1("Vous <b>avez compris</b> la leçon ?", ["Indicatif passé composé","Indicatif plus-que-parfait","Indicatif futur antérieur","Subjonctif passé"], 0, "avoir au présent + participe passé : passé composé."),
+  q1("Elle <b>avait oublié</b> ses clés.", ["Indicatif plus-que-parfait","Indicatif passé composé","Indicatif passé antérieur","Indicatif imparfait"], 0, "avoir à l'imparfait + participe passé : plus-que-parfait."),
+  q1("Nous <b>avions déjà mangé</b> quand il est arrivé.", ["Indicatif plus-que-parfait","Indicatif passé composé","Indicatif passé antérieur","Indicatif futur antérieur"], 0, "avoir à l'imparfait + participe passé : plus-que-parfait."),
+  q1("Ils <b>étaient sortis</b> avant la pluie.", ["Indicatif plus-que-parfait","Indicatif passé composé","Indicatif passé antérieur","Indicatif imparfait"], 0, "être à l'imparfait + participe passé : plus-que-parfait."),
+  q1("Tu <b>avais promis</b> de venir.", ["Indicatif plus-que-parfait","Indicatif passé composé","Conditionnel passé","Indicatif passé antérieur"], 0, "avoir à l'imparfait + participe passé : plus-que-parfait."),
+  q1("Dès qu'il <b>eut terminé</b>, il se leva.", ["Indicatif passé antérieur","Indicatif plus-que-parfait","Indicatif passé composé","Indicatif futur antérieur"], 0, "avoir au passé simple + participe passé : passé antérieur."),
+  q1("Quand elle <b>fut arrivée</b>, la fête commença.", ["Indicatif passé antérieur","Indicatif plus-que-parfait","Indicatif passé composé","Indicatif imparfait"], 0, "être au passé simple + participe passé : passé antérieur."),
+  q1("Après qu'ils <b>furent sortis</b>, la porte se referma.", ["Indicatif passé antérieur","Indicatif plus-que-parfait","Indicatif passé composé","Indicatif futur antérieur"], 0, "être au passé simple + participe passé : passé antérieur."),
+  q1("Quand vous <b>aurez fini</b>, prévenez-moi.", ["Indicatif futur antérieur","Indicatif passé composé","Conditionnel passé","Indicatif plus-que-parfait"], 0, "avoir au futur simple + participe passé : futur antérieur."),
+  q1("Dès qu'elle <b>sera arrivée</b>, nous partirons.", ["Indicatif futur antérieur","Indicatif passé antérieur","Conditionnel passé","Indicatif plus-que-parfait"], 0, "être au futur simple + participe passé : futur antérieur."),
+  q1("Ils <b>auront terminé</b> avant midi.", ["Indicatif futur antérieur","Conditionnel passé","Indicatif passé composé","Indicatif plus-que-parfait"], 0, "avoir au futur simple + participe passé : futur antérieur."),
+  q1("Une fois que tu <b>te seras reposé</b>, appelle-moi.", ["Indicatif futur antérieur","Conditionnel passé","Indicatif passé composé","Indicatif plus-que-parfait"], 0, "être au futur simple + participe passé (verbe pronominal) : futur antérieur.")
+];
+
+const L3 = [
+  q1("Il faut que tu <b>partes</b> maintenant.", ["Subjonctif présent","Indicatif présent","Indicatif futur simple","Impératif présent"], 0, "« il faut que » déclenche le subjonctif présent."),
+  q1("Je doute qu'elle <b>vienne</b> ce soir.", ["Subjonctif présent","Indicatif présent","Conditionnel présent","Indicatif futur simple"], 0, "« je doute que » déclenche le subjonctif présent."),
+  q1("Bien qu'il <b>pleuve</b>, nous sortirons.", ["Subjonctif présent","Indicatif présent","Indicatif futur simple","Conditionnel présent"], 0, "« bien que » déclenche le subjonctif présent."),
+  q1("Il faudrait que vous <b>finissiez</b> ce travail.", ["Subjonctif présent","Indicatif présent","Conditionnel présent","Subjonctif passé"], 0, "« il faudrait que » déclenche le subjonctif présent."),
+  q1("Je suis content qu'elle <b>ait réussi</b>.", ["Subjonctif passé","Indicatif passé composé","Subjonctif présent","Indicatif plus-que-parfait"], 0, "avoir au subjonctif présent + participe passé : subjonctif passé."),
+  q1("Bien qu'ils <b>soient partis</b> tôt, ils sont arrivés en retard.", ["Subjonctif passé","Indicatif passé composé","Indicatif plus-que-parfait","Subjonctif présent"], 0, "être au subjonctif présent + participe passé : subjonctif passé."),
+  q1("Elle <b>aimerait</b> voyager plus souvent.", ["Conditionnel présent","Indicatif futur simple","Indicatif imparfait","Subjonctif présent"], 0, "Radical du futur + terminaisons de l'imparfait : conditionnel présent."),
+  q1("Nous <b>partirions</b> volontiers avec vous.", ["Conditionnel présent","Indicatif futur simple","Indicatif imparfait","Conditionnel passé"], 0, "« partirions » : conditionnel présent."),
+  q1("Si j'avais de l'argent, j'<b>achèterais</b> cette maison.", ["Conditionnel présent","Indicatif futur simple","Indicatif imparfait","Subjonctif présent"], 0, "Conséquence hypothétique d'un « si » + imparfait : conditionnel présent."),
+  q1("Il <b>aurait aimé</b> venir avec nous.", ["Conditionnel passé","Indicatif plus-que-parfait","Indicatif passé composé","Subjonctif passé"], 0, "avoir au conditionnel présent + participe passé : conditionnel passé."),
+  q1("Sans cet accident, elle <b>serait arrivée</b> à l'heure.", ["Conditionnel passé","Indicatif plus-que-parfait","Indicatif futur antérieur","Subjonctif passé"], 0, "être au conditionnel présent + participe passé : conditionnel passé."),
+  q1("<b>Ferme</b> la porte, s'il te plaît !", ["Impératif présent","Indicatif présent","Subjonctif présent","Indicatif futur simple"], 0, "Ordre direct, pas de sujet exprimé : impératif présent."),
+  q1("<b>Finissons</b> ce travail avant ce soir !", ["Impératif présent","Indicatif présent","Subjonctif présent","Indicatif futur simple"], 0, "Suggestion à la 1ère personne du pluriel, pas de sujet exprimé : impératif présent.")
+];
+
+const L4 = [
+  q1("<b>Partir</b>, c'est mourir un peu.", ["Infinitif présent","Infinitif passé","Indicatif présent","Participe présent"], 0, "Forme non conjuguée de base, sujet du verbe « c'est » : infinitif présent."),
+  q1("Elle aime <b>chanter</b> sous la douche.", ["Infinitif présent","Participe présent","Indicatif présent","Infinitif passé"], 0, "Forme en -er après « aime » : infinitif présent."),
+  q1("Après <b>avoir terminé</b> son repas, il sortit.", ["Infinitif passé","Indicatif passé composé","Participe passé","Infinitif présent"], 0, "avoir à l'infinitif + participe passé, après « après » : infinitif passé."),
+  q1("Il regrette d'<b>être parti</b> si tôt.", ["Infinitif passé","Indicatif passé composé","Participe passé","Subjonctif passé"], 0, "être à l'infinitif + participe passé : infinitif passé."),
+  q1("<b>Chantant</b> à tue-tête, elle traversa la rue.", ["Participe présent","Infinitif présent","Indicatif imparfait","Gérondif"], 0, "Terminaison -ant sans « en » devant : participe présent (pas gérondif, qui exigerait « en chantant »)."),
+  q1("La porte, <b>fermée</b> à clé, résista.", ["Participe passé","Indicatif passé composé","Infinitif passé","Participe présent"], 0, "Forme en -ée employée seule, comme un adjectif : participe passé.")
+];
+
+/* ---------- PARTIE 2 : valeur des temps ---------- */
+const OPTS2 = ["Inaccomplie","Accomplie","Accomplie et antérieure","Postérieure"];
+function q2(s, correctWord, explain){ return {s, options:[...OPTS2], correct: OPTS2.indexOf(correctWord), explain}; }
+
+const L5 = [
+  q2("Il <b>pleuvait</b> sans arrêt.", "Inaccomplie", "Action en cours, non achevée : imparfait, valeur inaccomplie."),
+  q2("Le vase <b>se brisa</b> net.", "Accomplie", "Action brève et achevée : passé simple, valeur accomplie."),
+  q2("Elle <b>chantait</b> doucement dans sa chambre.", "Inaccomplie", "Action en cours, description : imparfait, valeur inaccomplie."),
+  q2("Le train <b>partit</b> à l'heure.", "Accomplie", "Action ponctuelle achevée : passé simple, valeur accomplie."),
+  q2("Nous <b>habitions</b> un petit village.", "Inaccomplie", "État durable, non délimité : imparfait, valeur inaccomplie."),
+  q2("Il <b>a fermé</b> la porte.", "Accomplie", "Action achevée, sans lien d'antériorité marqué ici : passé composé, valeur accomplie."),
+  q2("Les enfants <b>jouaient</b> dans la cour.", "Inaccomplie", "Action en cours : imparfait, valeur inaccomplie."),
+  q2("Elle <b>a réussi</b> son examen.", "Accomplie", "Action achevée : passé composé, valeur accomplie."),
+  q2("Le feu <b>crépitait</b> dans la cheminée.", "Inaccomplie", "Action en cours, arrière-plan : imparfait, valeur inaccomplie."),
+  q2("Il <b>sourit</b> brièvement.", "Accomplie", "Action brève et achevée : passé simple, valeur accomplie."),
+  q2("Vous <b>lisiez</b> tranquillement.", "Inaccomplie", "Action en cours : imparfait, valeur inaccomplie."),
+  q2("Le chat <b>a bondi</b> sur la table.", "Accomplie", "Action achevée : passé composé, valeur accomplie."),
+  q2("Vous <b>finissiez</b> votre café.", "Inaccomplie", "Action en cours, non achevée : imparfait, valeur inaccomplie.")
+];
+
+const L6 = [
+  q2("Quand elle est arrivée, nous <b>avions</b> déjà <b>fini</b> de manger.", "Accomplie et antérieure", "Plus-que-parfait : achevé et antérieur à son arrivée."),
+  q2("Dès qu'il <b>eut terminé</b>, il se leva.", "Accomplie et antérieure", "Passé antérieur : achevé et antérieur à l'action suivante."),
+  q2("Quand vous <b>aurez lu</b> ce livre, vous comprendrez tout.", "Accomplie et antérieure", "Futur antérieur : achevé et antérieur à un moment futur."),
+  q2("Il <b>avait perdu</b> ses clés la veille.", "Accomplie et antérieure", "Plus-que-parfait : achevé et antérieur à un repère passé."),
+  q2("Après qu'ils <b>furent sortis</b>, la porte se referma.", "Accomplie et antérieure", "Passé antérieur : achevé et antérieur à l'action suivante."),
+  q2("Dès qu'elle <b>sera arrivée</b>, nous partirons.", "Accomplie et antérieure", "Futur antérieur : achevé et antérieur à un moment futur."),
+  q2("Nous <b>avions préparé</b> le repas avant leur arrivée.", "Accomplie et antérieure", "Plus-que-parfait : achevé et antérieur à leur arrivée."),
+  q2("Aussitôt qu'il <b>eut compris</b>, il partit en courant.", "Accomplie et antérieure", "Passé antérieur : achevé et antérieur à l'action suivante."),
+  q2("Ils <b>auront terminé</b> leur travail avant midi.", "Accomplie et antérieure", "Futur antérieur : achevé et antérieur à midi."),
+  q2("Tu <b>avais oublié</b> ton parapluie chez moi.", "Accomplie et antérieure", "Plus-que-parfait : achevé et antérieur à un repère passé."),
+  q2("Une fois qu'elle <b>aura rangé</b> la cuisine, elle s'attaquera au salon.", "Accomplie et antérieure", "Futur antérieur : achevé et antérieur à un moment futur."),
+  q2("Comme il <b>avait plu</b> toute la nuit, les rues étaient inondées.", "Accomplie et antérieure", "Plus-que-parfait : achevé et antérieur à un repère passé."),
+  q2("Lorsque nous <b>eûmes fini</b> de parler, le silence retomba.", "Accomplie et antérieure", "Passé antérieur : achevé et antérieur à l'action suivante.")
+];
+
+const L7 = [
+  q2("Elle savait qu'elle <b>réussirait</b> un jour.", "Postérieure", "Conditionnel à valeur de futur dans le passé : pas encore réalisée, vient après le repère passé."),
+  q2("Il sentait qu'il <b>allait pleuvoir</b>.", "Postérieure", "Futur proche du passé (« allait » + infinitif) : postériorité."),
+  q2("Nous pressentions qu'elle <b>reviendrait</b> un jour.", "Postérieure", "Conditionnel à valeur de futur dans le passé : postériorité."),
+  q2("Elle devinait qu'il <b>gagnerait</b>.", "Postérieure", "Conditionnel à valeur de futur dans le passé : postériorité."),
+  q2("Il comprit aussitôt qu'il <b>devrait</b> secourir l'équipage.", "Postérieure", "Conditionnel à valeur de futur dans le passé : postériorité."),
+  q2("Personne ne se doutait qu'elle <b>déménagerait</b> bientôt.", "Postérieure", "Conditionnel à valeur de futur dans le passé : postériorité."),
+  q2("Je savais que cette nuit <b>resterait</b> gravée dans ma mémoire.", "Postérieure", "Conditionnel à valeur de futur dans le passé : postériorité."),
+  q2("Elle sentait qu'elle <b>allait pleurer</b>.", "Postérieure", "Futur proche du passé : postériorité."),
+  q2("Il savait qu'ils <b>partiraient</b> sans lui.", "Postérieure", "Conditionnel à valeur de futur dans le passé : postériorité."),
+  q2("Nous espérions qu'il <b>viendrait</b> nous voir.", "Postérieure", "Conditionnel à valeur de futur dans le passé : postériorité."),
+  q2("Elle promit qu'elle <b>appellerait</b> dès son arrivée.", "Postérieure", "Conditionnel à valeur de futur dans le passé : postériorité."),
+  q2("Ils annoncèrent qu'ils <b>déménageraient</b> au printemps.", "Postérieure", "Conditionnel à valeur de futur dans le passé : postériorité.")
+];
+
+const L8 = [
+  q2("Il avait travaillé toute la journée ; après qu'il <b>fut sorti</b>, il vit qu'il pleuvait.", "Accomplie et antérieure", "Passé antérieur : achevé et antérieur au fait de voir qu'il pleuvait."),
+  q2("Il avait travaillé toute la journée ; après qu'il fut sorti, il <b>vit</b> qu'il pleuvait.", "Accomplie", "Passé simple, action ponctuelle achevée."),
+  q2("Le gardien <b>habitait</b> le phare depuis vingt ans quand un bateau s'échoua.", "Inaccomplie", "Imparfait : état en cours, non délimité."),
+  q2("Le gardien habitait le phare depuis vingt ans quand un bateau <b>s'échoua</b>.", "Accomplie", "Passé simple : action ponctuelle achevée."),
+  q2("Il se rappela que la météo <b>avait annoncé</b> une tempête la veille.", "Accomplie et antérieure", "Plus-que-parfait : achevé et antérieur au moment où il se rappelle."),
+  q2("Il comprit aussitôt qu'il <b>devrait</b> secourir l'équipage.", "Postérieure", "Conditionnel à valeur de futur dans le passé : postériorité."),
+  q2("Quand nous sommes arrivés, ils <b>avaient</b> déjà <b>mangé</b>.", "Accomplie et antérieure", "Plus-que-parfait : achevé et antérieur à notre arrivée."),
+  q2("Pendant que le professeur parlait, les élèves <b>bavardaient</b> discrètement.", "Inaccomplie", "Imparfait : action en cours, simultanée."),
+  q2("Le coureur <b>franchit</b> la ligne avant que la pluie ne commence.", "Accomplie", "Passé simple : action ponctuelle achevée."),
+  q2("Elle savait déjà qu'elle <b>changerait</b> de vie.", "Postérieure", "Conditionnel à valeur de futur dans le passé : postériorité."),
+  q2("Dès qu'il <b>eut fini</b> ses devoirs, il sortit jouer.", "Accomplie et antérieure", "Passé antérieur : achevé et antérieur à l'action suivante."),
+  q2("Il pleuvait depuis le matin quand l'orage <b>éclata</b>.", "Accomplie", "Passé simple : action ponctuelle achevée.")
+];
+
+const LEVELS = [
+  { title: "Les temps simples de l'indicatif", part: 1, instr: "Identifiez le mode et le temps du verbe en gras.", questions: L1 },
+  { title: "Les temps composés de l'indicatif", part: 1, instr: "Identifiez le mode et le temps du verbe en gras.", questions: L2 },
+  { title: "Subjonctif, conditionnel, impératif", part: 1, instr: "Identifiez le mode et le temps du verbe en gras.", questions: L3 },
+  { title: "Infinitif et participe", part: 1, instr: "Identifiez le mode et le temps du verbe en gras.", questions: L4 },
+  { title: "Inaccomplie ou accomplie ?", part: 2, instr: "Identifiez la valeur du temps en gras.", questions: L5 },
+  { title: "Accomplie et antérieure", part: 2, instr: "Identifiez la valeur du temps en gras.", questions: L6 },
+  { title: "Postérieure", part: 2, instr: "Identifiez la valeur du temps en gras.", questions: L7 },
+  { title: "Mélange — phrases à plusieurs propositions", part: 2, instr: "Identifiez la valeur du temps en gras.", questions: L8 }
+];
+
+/* stable ids before any shuffle */
+LEVELS.forEach((lvl, li) => lvl.questions.forEach((q, qi) => { q.qid = li + '-' + qi; }));
+
+function shuffleArray(arr){
+  for (let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+function shuffleQuestionOptions(q){
+  const correctValue = q.options[q.correct];
+  const opts = q.options.map((o, i) => ({o, i}));
+  shuffleArray(opts);
+  q.options = opts.map(x => x.o);
+  q.correct = q.options.indexOf(correctValue);
+}
+function shuffleAllOptions(){
+  LEVELS.forEach(lvl => lvl.questions.forEach(shuffleQuestionOptions));
+}
+function shuffleAllQuestionOrder(){
+  LEVELS.forEach(lvl => shuffleArray(lvl.questions));
+}
+
+const STORAGE_KEY = "test-modes-temps-valeurs-v1";
+let state = {};
+function loadState(){
+  try { state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch(e){ state = {}; }
+}
+function saveState(){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch(e){}
+}
+function resetAll(){
+  if (confirm("Réinitialiser toutes vos réponses ?")){
+    state = {};
+    saveState();
+    location.reload();
+  }
+}
+
+let currentLevel = 0;
+
+function totalQuestions(){ return LEVELS.reduce((s,l) => s + l.questions.length, 0); }
+function totalAnswered(){ return Object.keys(state).length; }
+function totalCorrect(){
+  let c = 0;
+  LEVELS.forEach(lvl => lvl.questions.forEach(q => { if (state[q.qid] && state[q.qid].correct) c++; }));
+  return c;
+}
+function levelDone(lvl){ return lvl.questions.every(q => state[q.qid] !== undefined); }
+function levelScore(lvl){
+  let c = 0;
+  lvl.questions.forEach(q => { if (state[q.qid] && state[q.qid].correct) c++; });
+  return c;
+}
+
+function renderProgress(){
+  const total = totalQuestions(), answered = totalAnswered(), correct = totalCorrect();
+  document.getElementById('progress-text').textContent =
+    answered + " / " + total + " questions répondues — " + correct + " bonnes réponses";
+  document.getElementById('progress-bar').style.width = (100 * answered / total) + "%";
+}
+
+function renderNav(){
+  const nav = document.getElementById('nav');
+  nav.innerHTML = "";
+  LEVELS.forEach((lvl, li) => {
+    const btn = document.createElement('button');
+    btn.className = "nav-btn" + (li === currentLevel ? " active" : "");
+    const done = levelDone(lvl);
+    btn.innerHTML = (li+1) + ". " + lvl.title +
+      '<span class="stars">' + (done ? '<span class="done">✓ ' + levelScore(lvl) + '/' + lvl.questions.length + '</span>' : lvl.questions.length + ' questions') + '</span>';
+    btn.onclick = () => { currentLevel = li; renderAll(); window.scrollTo(0,0); };
+    nav.appendChild(btn);
+  });
+}
+
+function answerQuestion(q, idx, optEls){
+  if (state[q.qid] !== undefined) return;
+  const correct = (idx === q.correct);
+  state[q.qid] = { chosen: idx, correct };
+  saveState();
+  renderAll();
+}
+
+function renderQuestion(container, q, num){
+  const div = document.createElement('div');
+  div.className = "q";
+  const answered = state[q.qid];
+  div.innerHTML = '<div class="num">Question ' + num + '</div><div class="sent">' + q.s + '</div>';
+  const optsDiv = document.createElement('div');
+  optsDiv.className = "opts";
+  q.options.forEach((opt, idx) => {
+    const b = document.createElement('button');
+    b.className = "opt";
+    b.textContent = opt;
+    if (answered !== undefined){
+      if (idx === q.correct) b.classList.add("correct");
+      else if (idx === answered.chosen) b.classList.add("wrong");
+    }
+    b.onclick = () => answerQuestion(q, idx, optsDiv);
+    optsDiv.appendChild(b);
+  });
+  div.appendChild(optsDiv);
+  if (answered !== undefined){
+    const ex = document.createElement('div');
+    ex.className = "explain show";
+    ex.textContent = q.explain;
+    div.appendChild(ex);
+  }
+  container.appendChild(div);
+}
+
+function renderAll(){
+  renderProgress();
+  renderNav();
+  const quiz = document.getElementById('quiz');
+  quiz.innerHTML = "";
+  const lvl = LEVELS[currentLevel];
+  const label = document.createElement('div');
+  label.className = "part-label" + (lvl.part === 2 ? " part2" : "");
+  label.textContent = "Partie " + lvl.part + (lvl.part === 1 ? " — Mode et temps" : " — Valeur du temps");
+  quiz.appendChild(label);
+  const h = document.createElement('div');
+  h.className = "level-title";
+  h.textContent = (currentLevel+1) + ". " + lvl.title;
+  quiz.appendChild(h);
+  const instr = document.createElement('div');
+  instr.className = "level-instr";
+  instr.textContent = lvl.instr;
+  quiz.appendChild(instr);
+
+  let numBase = 0;
+  for (let i = 0; i < currentLevel; i++) numBase += LEVELS[i].questions.length;
+  lvl.questions.forEach((q, qi) => renderQuestion(quiz, q, numBase + qi + 1));
+
+  const total = totalQuestions(), answered = totalAnswered();
+  if (answered === total){
+    document.getElementById('summary').style.display = "block";
+    document.getElementById('summary').innerHTML =
+      "<b>Test terminé !</b> Score final : " + totalCorrect() + " / " + total +
+      " (" + Math.round(100*totalCorrect()/total) + " %).";
+  } else {
+    document.getElementById('summary').style.display = "none";
+  }
+}
+
+function start(){
+  shuffleAllQuestionOrder();
+  shuffleAllOptions();
+  loadState();
+  renderAll();
+}
+start();
+</script>
